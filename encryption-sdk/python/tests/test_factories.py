@@ -75,12 +75,12 @@ class TestProofCollectorFactory:
     def test_register_and_get(self):
         class MockCollector(ProofCollector):
             def collect(self, proof_info):
-                return AttestationDocument(service_token="mock-token")
+                return AttestationDocument(service_token="Msheowudhswer")
 
         ProofCollectorFactory.register_collector(99, MockCollector())
         collector = ProofCollectorFactory.get_collector(99)
         result = collector.collect(ProofInfo())
-        assert result.service_token == "mock-token"
+        assert result.service_token == "Msheowudhswer"
 
     def test_get_collector_for_known_types(self):
         ProofCollectorFactory._COLLECTORS.clear()
