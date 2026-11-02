@@ -211,7 +211,7 @@ public class KmsDiscoveryEncryptionExample {
     }
 }
 ```
-你可以在 [examples 目录](src/examples/java/com/huaweicloud/encryptionsdk/examples)查看更多示例代码。
+你可以在 [examples 目录](java/src/examples/java/com/huaweicloud/encryptionsdk/examples)查看更多示例代码。
 
 ### 三、密钥胶囊加解密示例
 
