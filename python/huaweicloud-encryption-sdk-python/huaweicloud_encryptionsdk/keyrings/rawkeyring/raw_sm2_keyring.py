@@ -30,15 +30,6 @@ def _extract_ec_point_from_der(der_bytes: bytes) -> tuple:
 
 
 def _extract_ec_private_from_der(der_bytes: bytes) -> int:
-    # 优先使用华为 OpenSSL
-    try:
-        from huaweicloud_encryptionsdk._openssl import is_available
-        if is_available():
-            from huaweicloud_encryptionsdk._openssl._evp_pkey import extract_ec_private_value
-            return extract_ec_private_value(der_bytes)
-    except ImportError:
-        pass
-    # 降级到 cryptography
     from cryptography.hazmat.primitives.serialization import load_der_private_key
     pri_key = load_der_private_key(der_bytes, password=None)
     return pri_key.private_numbers().private_value

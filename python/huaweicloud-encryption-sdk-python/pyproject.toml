@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "huaweicloud-encryption-sdk-python"
-version = "0.0.2"
+version = "1.2.1"
 description = "HuaweiCloud Encryption SDK for Python"
 requires-python = ">=3.9"
 license = {text = "Apache-2.0"}
@@ -23,9 +23,6 @@ lts = [
     "loguru",
     "six",
 ]
-openssl-fallback = [
-    "cryptography>=42.0.0",
-]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
@@ -33,7 +30,3 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["huaweicloud_encryptionsdk*"]
-
-[tool.setuptools.package-data]
-"huaweicloud_encryptionsdk" = ["_openssl/*.so", "_openssl/*.so.*"]

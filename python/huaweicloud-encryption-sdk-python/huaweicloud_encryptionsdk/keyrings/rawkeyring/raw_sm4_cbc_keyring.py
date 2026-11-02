@@ -15,28 +15,15 @@ SM4_CBC_IV_LEN = 16
 
 class RawSM4CBCKeyring(RawKeyring):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # SM4-CBC 仅支持华为 OpenSSL，无降级方案
-        try:
-            from huaweicloud_encryptionsdk._openssl import is_available
-            if not is_available():
-                raise EncryptException(
-                    ErrorMessage.ENCRYPT_EXCEPTION.message,
-                    RuntimeError("SM4-CBC 需要华为 OpenSSL，但当前环境不可用（已降级到 cryptography，不支持国密算法）")
-                )
-        except ImportError:
-            raise EncryptException(
-                ErrorMessage.ENCRYPT_EXCEPTION.message,
-                RuntimeError("无法导入 _openssl 模块，SM4-CBC 不可用")
-            )
-
     def real_encrypt(self, key_bytes: bytes, ciphertext_data_keys: list, data_key_materials: DataKeyMaterials):
         try:
             iv = os.urandom(SM4_CBC_IV_LEN)
-            from huaweicloud_encryptionsdk._openssl import sm4_cbc_encrypt
+            from gmssl.sm4 import CryptSM4, SM4_ENCRYPT
             original_data_key = data_key_materials.plaintext_data_key
-            encrypted = sm4_cbc_encrypt(key_bytes, iv, original_data_key)
+            padded = self._pkcs7_pad(original_data_key, 16)
+            crypt_sm4 = CryptSM4()
+            crypt_sm4.set_key(key_bytes, SM4_ENCRYPT)
+            encrypted = crypt_sm4.crypt_cbc(iv, padded)
             message = iv + encrypted
             ciphertext_data_keys.append(CiphertextDataKey(data_key=message))
         except Exception as e:
@@ -50,8 +37,11 @@ class RawSM4CBCKeyring(RawKeyring):
                 raise ValueError("data key too short")
             iv = data_key[:SM4_CBC_IV_LEN]
             ct = data_key[SM4_CBC_IV_LEN:]
-            from huaweicloud_encryptionsdk._openssl import sm4_cbc_decrypt
-            decrypted = sm4_cbc_decrypt(key_bytes, iv, ct)
+            from gmssl.sm4 import CryptSM4, SM4_DECRYPT
+            crypt_sm4 = CryptSM4()
+            crypt_sm4.set_key(key_bytes, SM4_DECRYPT)
+            decrypted = crypt_sm4.crypt_cbc(iv, ct)
+            decrypted = self._pkcs7_unpad(decrypted)
             algo_name = data_key_materials.crypto_algorithm.get_algorithm_name() if data_key_materials.crypto_algorithm else "SM4"
             data_key_materials.plaintext_data_key = byte_to_secret_key(decrypted, algo_name)
             return True
@@ -64,3 +54,13 @@ class RawSM4CBCKeyring(RawKeyring):
 
     def get_decrypt_secret_key(self) -> list[bytes]:
         return self.symmetric_key
+
+    @staticmethod
+    def _pkcs7_pad(data, block_size):
+        pad_len = block_size - (len(data) % block_size)
+        return data + bytes([pad_len] * pad_len)
+
+    @staticmethod
+    def _pkcs7_unpad(data):
+        pad_len = data[-1]
+        return data[:-pad_len]

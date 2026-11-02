@@ -16,36 +16,21 @@ SM4_GCM_TAG_LEN = 16
 
 class RawSM4Keyring(RawKeyring):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # SM4-GCM 仅支持华为 OpenSSL，无降级方案
-        try:
-            from huaweicloud_encryptionsdk._openssl import is_available, supports_sm4_gcm
-            if not is_available():
-                raise EncryptException(
-                    ErrorMessage.ENCRYPT_EXCEPTION.message,
-                    RuntimeError("SM4-GCM 需要华为 OpenSSL，但当前环境不可用（已降级到 cryptography，不支持国密算法）")
-                )
-            if not supports_sm4_gcm():
-                raise EncryptException(
-                    ErrorMessage.ENCRYPT_EXCEPTION.message,
-                    RuntimeError("SM4-GCM 需要 OpenSSL 3.1+，当前 OpenSSL 版本不支持")
-                )
-        except ImportError:
-            raise EncryptException(
-                ErrorMessage.ENCRYPT_EXCEPTION.message,
-                RuntimeError("无法导入 _openssl 模块，SM4-GCM 不可用")
-            )
-
     def real_encrypt(self, key_bytes: bytes, ciphertext_data_keys: list, data_key_materials: DataKeyMaterials):
         try:
             iv = os.urandom(SM4_GCM_IV_LEN)
-            from huaweicloud_encryptionsdk._openssl import sm4_gcm_encrypt
+            from cryptography.hazmat.primitives.ciphers import Cipher as _Cipher, algorithms as _algs, modes as _modes
 
+            sm4_alg = _algs.SM4(key_bytes)
+            gcm = _modes.GCM(iv)
+            cipher = _Cipher(sm4_alg, gcm)
+            encryptor = cipher.encryptor()
             aad = serialize_context(data_key_materials.encryption_contexts)
+            if aad:
+                encryptor.authenticate_additional_data(aad)
             original_data_key = data_key_materials.plaintext_data_key
-            ct, tag = sm4_gcm_encrypt(key_bytes, iv, original_data_key, aad)
-            encrypted_with_tag = ct + tag
+            encrypted = encryptor.update(original_data_key) + encryptor.finalize()
+            encrypted_with_tag = encrypted + encryptor.tag
             message = iv + encrypted_with_tag
             ciphertext_data_keys.append(CiphertextDataKey(data_key=message))
         except Exception as e:
@@ -61,10 +46,16 @@ class RawSM4Keyring(RawKeyring):
             tag = data_key[-SM4_GCM_TAG_LEN:]
             ct = data_key[SM4_GCM_IV_LEN:-SM4_GCM_TAG_LEN]
 
-            from huaweicloud_encryptionsdk._openssl import sm4_gcm_decrypt
+            from cryptography.hazmat.primitives.ciphers import Cipher as _Cipher, algorithms as _algs, modes as _modes
 
+            sm4_alg = _algs.SM4(key_bytes)
+            gcm = _modes.GCM(iv, tag, min_tag_length=SM4_GCM_TAG_LEN)
+            cipher = _Cipher(sm4_alg, gcm)
+            decryptor = cipher.decryptor()
             aad = serialize_context(data_key_materials.encryption_contexts)
-            decrypted = sm4_gcm_decrypt(key_bytes, iv, ct, tag, aad)
+            if aad:
+                decryptor.authenticate_additional_data(aad)
+            decrypted = decryptor.update(ct) + decryptor.finalize()
             algo_name = data_key_materials.crypto_algorithm.get_algorithm_name() if data_key_materials.crypto_algorithm else "SM4"
             data_key_materials.plaintext_data_key = byte_to_secret_key(decrypted, algo_name)
             return True
