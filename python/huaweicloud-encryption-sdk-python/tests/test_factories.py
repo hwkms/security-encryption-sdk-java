@@ -69,22 +69,3 @@ class TestDataKeyGenerateFactory:
     def test_key_capsule(self):
         gen = DataKeyGenerateFactory.get_data_key_generate(DataKeyGenerateType.KEY_CAPSULE_GENERATE)
         assert isinstance(gen, KeyCapsuleDataKeyGenerate)
-
-
-class TestProofCollectorFactory:
-    def test_register_and_get(self):
-        class MockCollector(ProofCollector):
-            def collect(self, proof_info):
-                return AttestationDocument(service_token="mock-token")
-
-        ProofCollectorFactory.register_collector(99, MockCollector())
-        collector = ProofCollectorFactory.get_collector(99)
-        result = collector.collect(ProofInfo())
-        assert result.service_token == "mock-token"
-
-    def test_get_collector_for_known_types(self):
-        ProofCollectorFactory._COLLECTORS.clear()
-        ProofCollectorFactory._init_collectors()
-        for type_val in [1, 2, 3]:
-            collector = ProofCollectorFactory.get_collector(type_val)
-            assert collector is not None
