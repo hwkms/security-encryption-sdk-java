@@ -180,8 +180,8 @@ public class KmsSigner {
             MessageDigest digest = MessageDigest.getInstance(SHA_256);
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             return bytesToHex(hash);
-        } catch (Exception e) {
-            throw new RuntimeException("SHA-256 hash failed", e);
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 algorithm not available", e);
         }
     }
 
@@ -196,8 +196,8 @@ public class KmsSigner {
             mac.init(secretKeySpec);
             byte[] signature = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
             return bytesToHex(signature);
-        } catch (Exception e) {
-            throw new RuntimeException("HMAC-SHA256 sign failed", e);
+        } catch (java.security.NoSuchAlgorithmException | java.security.InvalidKeyException e) {
+            throw new IllegalStateException("HMAC-SHA256 sign failed", e);
         }
     }
 
