@@ -2,9 +2,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.huaweicloud.sdk</groupId>
+    <groupId>${sdk.groupId}</groupId>
     <artifactId>huaweicloud-encryption-sdk-java</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <packaging>jar</packaging>
 
     <name>huaweicloud-encryption-sdk-java</name>
@@ -12,10 +12,20 @@
 
 
     <properties>
+		<sdk.groupId>com.huaweicloud.sdk</sdk.groupId>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.surefire.plugin.version>3.0.0-M7</maven.surefire.plugin.version>
         <jacoco.version>0.8.11</jacoco.version>
     </properties>
+	
+	<profiles>
+        <profile>
+            <id>hwkms-release</id>
+            <properties>
+                <sdk.groupId>io.github.hwkms</sdk.groupId>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>
