@@ -96,7 +96,8 @@ public final class ProviderManager {
                     Provider jce = Security.getProvider("SunJCE");
                     if (jce == null) {
                         LOGGER.error("SunJCE provider not available, falling back to BouncyCastle");
-                        return getBcProvider();
+                        sunJceProvider = getBcProvider();
+                        return sunJceProvider;
                     }
                     sunJceProvider = jce;
                 }

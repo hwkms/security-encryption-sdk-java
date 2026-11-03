@@ -3,6 +3,7 @@ package com.huaweicloud.encryptionsdk.proof;
 import com.huaweicloud.encryptionsdk.proof.collector.CceProofCollector;
 import com.huaweicloud.encryptionsdk.proof.collector.EcsProofCollector;
 import com.huaweicloud.encryptionsdk.proof.collector.KeyPairProofCollector;
+import com.huaweicloud.encryptionsdk.proof.collector.MaProofCollector;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +21,7 @@ public class ProofCollectorFactory {
         registerCollector(1, new EcsProofCollector());
         registerCollector(2, new KeyPairProofCollector());
         registerCollector(3, new CceProofCollector());
+        registerCollector(4, new MaProofCollector());
     }
 
     /**

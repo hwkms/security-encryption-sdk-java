@@ -104,7 +104,7 @@ public class KmsDiscoveryEncryptionExample {
         }
 
         try (FileInputStream sourceStream = new FileInputStream(sourceFile);
-             FileInputStream targetStream = new FileInputStream(sourceFile)) {
+             FileInputStream targetStream = new FileInputStream(targetFile)) {
             byte[] sourceBytes = new byte[1024];
             byte[] targetBytes = new byte[1024];
 

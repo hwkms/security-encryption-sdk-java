@@ -1,13 +1,10 @@
 package com.huaweicloud.encryptionsdk.kms;
 
-import com.cloud.apigateway.sdk.utils.Client;
-import com.cloud.apigateway.sdk.utils.Request;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.huaweicloud.encryptionsdk.exception.ErrorMessage;
 import com.huaweicloud.encryptionsdk.exception.HuaweicloudException;
 import com.huaweicloud.encryptionsdk.model.KMSConfig;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
@@ -22,13 +19,15 @@ import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.util.Map;
+
 public class KmsHttpClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KmsHttpClient.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    private static final String SIGNATURE_ALGORITHM = "SDK-HMAC-SHA256";
     private static final String CONTENT_TYPE_JSON = "application/json";
     private static final int CONNECT_TIMEOUT_SECONDS = 10;
     private static final int SOCKET_TIMEOUT_SECONDS = 10;
@@ -72,6 +71,7 @@ public class KmsHttpClient {
     private final String sk;
     private final String securityToken;
     private final KMSConfig kmsConfig;
+    private final KmsSigner signer;
 
     public KmsHttpClient(String ak, String sk, KMSConfig kmsConfig) {
         this(ak, sk, null, kmsConfig);
@@ -82,6 +82,7 @@ public class KmsHttpClient {
         this.sk = sk;
         this.securityToken = securityToken;
         this.kmsConfig = kmsConfig;
+        this.signer = new KmsSigner(ak, sk, securityToken);
     }
 
     public <T> T post(String uri, Object body, Class<T> responseType) {
@@ -112,25 +113,19 @@ public class KmsHttpClient {
         }
 
         try {
-            Request signRequest = new Request();
-            signRequest.setKey(ak);
-            signRequest.setSecret(sk);
-            signRequest.setMethod(method);
-            signRequest.setUrl(url);
-            signRequest.addHeader("Content-Type", CONTENT_TYPE_JSON);
-            if (StringUtils.isNotEmpty(securityToken)) {
-                signRequest.addHeader("X-Security-Token", securityToken);
+            // 使用自实现的签名工具
+            Map<String, String> signedHeaders = signer.sign(method, url, jsonBody, CONTENT_TYPE_JSON);
+
+            // 构造 HTTP 请求
+            HttpUriRequestBase request = new HttpUriRequestBase(method, URI.create(url));
+            for (Map.Entry<String, String> entry : signedHeaders.entrySet()) {
+                request.setHeader(entry.getKey(), entry.getValue());
             }
             if (jsonBody != null) {
-                signRequest.setBody(jsonBody);
+                request.setEntity(new StringEntity(jsonBody, ContentType.parse(CONTENT_TYPE_JSON)));
             }
 
-            HttpUriRequestBase signedRequest = Client.sign(signRequest, SIGNATURE_ALGORITHM);
-            if (jsonBody != null) {
-                signedRequest.setEntity(new StringEntity(jsonBody, ContentType.APPLICATION_JSON));
-            }
-
-            return SHARED_CLIENT.execute(signedRequest, response -> {
+            return SHARED_CLIENT.execute(request, response -> {
                 String responseBody = EntityUtils.toString(response.getEntity());
                 if (response.getHeader("X-Request-Id") != null) {
                     LOGGER.info("[EncryptionSDK] X-Request-Id is {}", response.getHeader("X-Request-Id").getValue());
@@ -153,6 +148,9 @@ public class KmsHttpClient {
         String endpoint = kmsConfig.getEndPoint();
         if (endpoint == null || endpoint.isEmpty()) {
             throw new HuaweicloudException(ErrorMessage.END_POINT_NOT_NULL.getMessage());
+        }
+        if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
+            endpoint = "https://" + endpoint;
         }
         return endpoint + "/v1.0/" + kmsConfig.getProjectId() + uri;
     }

@@ -29,12 +29,20 @@ public class AttestationDocument {
     @JsonProperty("service_token")
     private String serviceToken;
 
+    @JsonProperty("modelarts_job_id")
+    private String modelartsJobId;
+
+    @JsonProperty("modelarts_pool_id")
+    private String modelartsPoolId;
+
     @Override
     public String toString() {
         return "AttestationDocument(ecsSignature=" + ecsSignature
                 + ", customSignature=" + customSignature
                 + ", customPublicKey=" + customPublicKey
                 + ", expireTime=" + expireTime
-                + ", serviceToken=****)";
+                + ", serviceToken=****"
+                + ", modelartsJobId=" + modelartsJobId
+                + ", modelartsPoolId=" + modelartsPoolId + ")";
     }
 }

@@ -30,6 +30,4 @@ public class ProofInfo {
     private PrivateKeyDecryptCallback privateKeyDecryptCallback;
 
     private String keyCapsule;
-
-    private String serviceAccount;
 }

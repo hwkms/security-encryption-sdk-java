@@ -37,7 +37,7 @@ public class KeyCapsuleEncryptionExample {
         String projectId = "project_id";
         String region = "cn-north-4";
         String keyId = "kms_key_id";
-        String endpoint = "https://kms.cn-north-4.myhuaweicloud.com";
+        String endpoint = "kms.cn-north-4.myhuaweicloud.com";
 
         // 3. KMS 配置基本信息：封装 region，keyId，projectId 信息（可支持多个 region，此处仅设置一个 region 信息）
         List<KMSConfig> kmsConfigList = Collections.singletonList(new KMSConfig(region, keyId, projectId, endpoint));

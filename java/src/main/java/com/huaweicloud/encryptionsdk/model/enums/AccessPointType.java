@@ -4,7 +4,8 @@ public enum AccessPointType {
 
     ECS(1, "ECS"),
     CUSTOM(2, "Custom"),
-    CCE(3, "CCE");
+    CCE(3, "CCE"),
+    MA(4, "MA");
 
     private final int code;
     private final String displayName;

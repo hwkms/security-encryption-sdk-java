@@ -29,9 +29,4 @@ public class AccessPointConfig {
      * 私钥解密回调（由用户实现）
      */
     private PrivateKeyDecryptCallback privateKeyDecryptCallback;
-
-    /**
-     * CCE场景的ServiceAccount名称，默认default
-     */
-    private String serviceAccount;
 }

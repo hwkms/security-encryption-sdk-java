@@ -44,7 +44,7 @@ public class RawSM2Keyring extends RawKeyring {
             SecretKey plaintextDataKey = dataKeyMaterials.getPlaintextDataKey();
             byte[] encodeDatakey = plaintextDataKey.getEncoded();
             ECPublicKeyParameters publicKeyParam = getPublicKeyParam(bytes);
-            SM2Engine sm2Engine = new SM2Engine();
+            SM2Engine sm2Engine = new SM2Engine(SM2Engine.Mode.C1C3C2);
             sm2Engine.init(true, new ParametersWithRandom(publicKeyParam));
             byte[] result = sm2Engine.processBlock(encodeDatakey, 0, encodeDatakey.length);
             ciphertextDataKeys.add(new CiphertextDataKey(result));
@@ -55,13 +55,34 @@ public class RawSM2Keyring extends RawKeyring {
 
     @Override
     public boolean realDecrypt(byte[] bytes, CiphertextDataKey ciphertextDataKey, DataKeyMaterials dataKeyMaterials) {
+        ECPrivateKeyParameters privateKeyParameters;
         try {
-            ECPrivateKeyParameters privateKeyParameters = getPrivateKeyParameters(
+            privateKeyParameters = getPrivateKeyParameters(
                 (ECPrivateKey) parsePrivateKeyWithBc(bytes));
-            SM2Engine sm2Engine = new SM2Engine();
+        } catch (Exception e) {
+            LOGGER.warn("failed to parse private key in RawSM2Keyring.class");
+            return false;
+        }
+
+        byte[] ciphertext = ciphertextDataKey.getDataKey();
+
+        // 尝试 1: C1C3C2（国标 GB/T 32918.4，与加密一致）
+        try {
+            SM2Engine sm2Engine = new SM2Engine(SM2Engine.Mode.C1C3C2);
             sm2Engine.init(false, privateKeyParameters);
-            byte[] dataKey = sm2Engine.processBlock(ciphertextDataKey.getDataKey(), 0,
-                ciphertextDataKey.getDataKey().length);
+            byte[] dataKey = sm2Engine.processBlock(ciphertext, 0, ciphertext.length);
+            dataKeyMaterials.setPlaintextDataKey(
+                Utils.byteToSecretKey(dataKey, dataKeyMaterials.getCryptoAlgorithm().getAlgorithmName()));
+            return true;
+        } catch (Exception e) {
+            // C1C3C2 失败，尝试 C1C2C3
+        }
+
+        // 尝试 2: C1C2C3（兼容旧格式）
+        try {
+            SM2Engine sm2Engine = new SM2Engine(SM2Engine.Mode.C1C2C3);
+            sm2Engine.init(false, privateKeyParameters);
+            byte[] dataKey = sm2Engine.processBlock(ciphertext, 0, ciphertext.length);
             dataKeyMaterials.setPlaintextDataKey(
                 Utils.byteToSecretKey(dataKey, dataKeyMaterials.getCryptoAlgorithm().getAlgorithmName()));
             return true;

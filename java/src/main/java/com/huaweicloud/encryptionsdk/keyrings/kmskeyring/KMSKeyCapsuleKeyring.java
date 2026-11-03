@@ -72,7 +72,6 @@ public class KMSKeyCapsuleKeyring extends KMSKeyring {
         proofInfo.setKeyCapsule(keyCapsule.getDatakeyCapsule());
         proofInfo.setEncryptedPrivateKey(accessPointConfig.getEncryptedPrivateKey());
         proofInfo.setPrivateKeyDecryptCallback(accessPointConfig.getPrivateKeyDecryptCallback());
-        proofInfo.setServiceAccount(accessPointConfig.getServiceAccount());
 
         // 收集证明文档
         AttestationDocument attestationDocument = ProofCollectorFactory.collect(proofInfo);

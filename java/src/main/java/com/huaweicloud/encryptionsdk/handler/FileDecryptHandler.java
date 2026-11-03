@@ -103,6 +103,10 @@ public class FileDecryptHandler {
                     int contentLength = tempHeader.getContentLength();
                     offset += fileHeaderLength;
 
+                    if (contentLength == 0) {
+                        throw new HuaweicloudException(ErrorMessage.FILE_CHANGED_ERROR.getMessage());
+                    }
+
                     if (contentLength > total - offset) {
                         // 数据不完整，保存 header 和剩余数据
                         header = tempHeader;
@@ -134,6 +138,9 @@ public class FileDecryptHandler {
                     tailHeader.deserializeFileFields(headerBytes, algorithm);
                     header = tailHeader;
                     unParsedByte = Arrays.copyOfRange(unParsedByte, fileHeaderLength, unParsedByte.length);
+                }
+                if (header.getContentLength() == 0) {
+                    throw new HuaweicloudException(ErrorMessage.FILE_CHANGED_ERROR.getMessage());
                 }
                 if (header.getContentLength() > unParsedByte.length) {
                     break;

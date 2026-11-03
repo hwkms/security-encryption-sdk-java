@@ -21,7 +21,7 @@ public class CceProofCollectorTest {
     @Test
     public void testCollectThrowsWhenTokenFileNotExists() {
         CceProofCollector collector = new CceProofCollector();
-        ProofInfo proofInfo = ProofInfo.builder().type(3).serviceAccount("default").build();
+        ProofInfo proofInfo = ProofInfo.builder().type(3).build();
         try {
             collector.collect(proofInfo);
         } catch (HuaweicloudException e) {
@@ -32,7 +32,7 @@ public class CceProofCollectorTest {
     @Test
     public void testCollectWithMockedToken() {
         CceProofCollector collector = new CceProofCollector();
-        ProofInfo proofInfo = ProofInfo.builder().type(3).serviceAccount("default").build();
+        ProofInfo proofInfo = ProofInfo.builder().type(3).build();
 
         try (MockedStatic<Files> filesMock = mockStatic(Files.class)) {
             filesMock.when(() -> Files.readAllBytes(any(Path.class)))
@@ -47,7 +47,7 @@ public class CceProofCollectorTest {
     @Test
     public void testCollectWithReadException() {
         CceProofCollector collector = new CceProofCollector();
-        ProofInfo proofInfo = ProofInfo.builder().type(3).serviceAccount("default").build();
+        ProofInfo proofInfo = ProofInfo.builder().type(3).build();
 
         try (MockedStatic<Files> filesMock = mockStatic(Files.class)) {
             filesMock.when(() -> Files.readAllBytes(any(Path.class)))

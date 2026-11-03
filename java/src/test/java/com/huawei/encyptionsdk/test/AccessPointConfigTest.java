@@ -14,23 +14,20 @@ public class AccessPointConfigTest {
                 .type(2)
                 .encryptedPrivateKey("encryptedKey")
                 .privateKeyDecryptCallback(callback)
-                .serviceAccount("my-sa")
                 .build();
 
         Assert.assertEquals(2, config.getType());
         Assert.assertEquals("encryptedKey", config.getEncryptedPrivateKey());
         Assert.assertEquals(callback, config.getPrivateKeyDecryptCallback());
-        Assert.assertEquals("my-sa", config.getServiceAccount());
     }
 
     @Test
-    public void testBuilder_WithoutServiceAccount() {
+    public void testBuilder_WithTypeOnly() {
         AccessPointConfig config = AccessPointConfig.builder()
                 .type(1)
                 .build();
 
         Assert.assertEquals(1, config.getType());
-        Assert.assertNull(config.getServiceAccount());
         Assert.assertNull(config.getEncryptedPrivateKey());
         Assert.assertNull(config.getPrivateKeyDecryptCallback());
     }
@@ -40,11 +37,9 @@ public class AccessPointConfigTest {
         AccessPointConfig config = new AccessPointConfig();
         config.setType(3);
         config.setEncryptedPrivateKey("key");
-        config.setServiceAccount("sa");
 
         Assert.assertEquals(3, config.getType());
         Assert.assertEquals("key", config.getEncryptedPrivateKey());
-        Assert.assertEquals("sa", config.getServiceAccount());
     }
 
     @Test
@@ -56,11 +51,10 @@ public class AccessPointConfigTest {
     @Test
     public void testAllArgsConstructor() {
         PrivateKeyDecryptCallback callback = encrypted -> "plain";
-        AccessPointConfig config = new AccessPointConfig(2, "encKey", callback, "sa");
+        AccessPointConfig config = new AccessPointConfig(2, "encKey", callback);
         Assert.assertEquals(2, config.getType());
         Assert.assertEquals("encKey", config.getEncryptedPrivateKey());
         Assert.assertEquals(callback, config.getPrivateKeyDecryptCallback());
-        Assert.assertEquals("sa", config.getServiceAccount());
     }
 
     @Test
