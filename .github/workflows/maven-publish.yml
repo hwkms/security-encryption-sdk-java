@@ -30,7 +30,9 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
 
       - name: Publish to Maven Central
-        run: mvn -B clean deploy -DskipTests -f pom-hwkms.xml -Dgpg.passphrase="$GPG_PASSPHRASE"
+        run: |
+           \cp pom-hwkms.xml pom.xml
+           mvn -B clean deploy -DskipTests -f pom.xml -Dgpg.passphrase="$GPG_PASSPHRASE"
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           # 和上面 setup-java 里的占位符对应
