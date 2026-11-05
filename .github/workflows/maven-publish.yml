@@ -19,6 +19,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           generate-toolchains: false
+          # ✅ 关键：自动生成settings.xml，注入server id=central
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
 
       - name: Import GPG Key
         run: printf '%s' "$GPG_PRIVATE_KEY" | gpg --batch --import
@@ -29,5 +33,6 @@ jobs:
         run: mvn -B clean deploy -DskipTests -f pom-hwkms.xml -Dgpg.passphrase="$GPG_PASSPHRASE"
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          SONATYPE_USERNAME: ${{ secrets.TOKEN_USERNAME }}
-          SONATYPE_TOKEN: ${{ secrets.TOKEN_PASSWORD }}
+          # 和上面 setup-java 里的占位符对应
+          MAVEN_USERNAME: ${{ secrets.TOKEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.TOKEN_PASSWORD }}
