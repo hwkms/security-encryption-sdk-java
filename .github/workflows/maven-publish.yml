@@ -10,6 +10,9 @@ jobs:
   publish:
     runs-on: ubuntu-22.04
     steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
@@ -17,32 +20,14 @@ jobs:
           distribution: 'temurin'
           generate-toolchains: false
 
-      - name: Write maven settings.xml
-        env:
-          USERNAME: ${{ secrets.TOKEN_USERNAME }}
-          PASSWORD: ${{ secrets.TOKEN_USERNAME }}
-        run: |
-          mkdir -p ~/.m2
-          echo '<settings><servers><server><id>central</id><username>'"$USERNAME"'</username><password>'"$PASSWORD"'</password></server></servers></settings>' > ~/.m2/settings.xml
-      - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1.21.0
-        with:
-          java-version: '17'
-          java-distribution: 'temurin'
-          maven-version: 3.9.16
-          settings-servers: |
-            [
-              {
-                "id": "central",
-                "username": "${{ secrets.TOKEN_USERNAME }}",
-                "password": "${{ secrets.TOKEN_PASSWORD }}"
-              }
-            ]
       - name: Import GPG Key
         run: printf '%s' "$GPG_PRIVATE_KEY" | gpg --batch --import
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+
       - name: Publish to Maven Central
-        run: mvn -B clean deploy -DskipTests -f pom-hwkms.xml -Dgpg.passphrase="$GPG_PASSPHRASE"
+        run: mvn -B clean publish -DskipTests -f pom-hwkms.xml -Dgpg.passphrase="$GPG_PASSPHRASE"
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          SONATYPE_USERNAME: ${{ secrets.TOKEN_USERNAME }}
+          SONATYPE_TOKEN: ${{ secrets.TOKEN_PASSWORD }}
