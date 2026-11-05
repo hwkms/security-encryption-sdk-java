@@ -33,6 +33,11 @@ jobs:
         run: |
            \cp pom-hwkms.xml pom.xml
            mvn -B clean deploy -DskipTests -f pom.xml -Dgpg.passphrase="$GPG_PASSPHRASE"
+           mvn -B central-publishing:publish \
+            -Dcentral.groupId=io.github.hwkms \
+            -Dcentral.artifactId=huaweicloud-encryption-sdk-java \
+            -Dcentral.version=1.2.3 \
+            -Dcentral.stagingDirectory=${HOME}/.m2/repository/io/github/hwkms/huaweicloud-encryption-sdk-java/1.2.3
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           # 和上面 setup-java 里的占位符对应
