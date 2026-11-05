@@ -15,6 +15,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          generate-toolchains: false
       - name: Setup Maven Action
         uses: s4u/setup-maven-action@v1.21.0
         with:
