@@ -30,20 +30,7 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
 
       - name: Publish to Maven Central
-        run: |
-          cp pom-hwkms.xml pom.xml
-          mvn -B clean install -DskipTests -f pom.xml -Dgpg.passphrase="$GPG_PASSPHRASE"
-          ls -la ~/.m2/repository/io/github/hwkms/huaweicloud-encryption-sdk-java/1.2.3/
-          # 新建空目录，cd进去，脱离项目pom上下文
-          mkdir -p /tmp/empty
-          cd /tmp/empty
-          mvn -B org.sonatype.central:central-publishing-maven-plugin:0.12.0:publish \
-            -Dcentral.groupId=io.github.hwkms \
-            -Dcentral.artifactId=huaweicloud-encryption-sdk-java \
-            -Dcentral.version=1.2.3 \
-            -Dcentral.stagingDirectory=${HOME}/.m2/repository/io/github/hwkms/huaweicloud-encryption-sdk-java/1.2.3 \
-            -Dcentral.publishingServerId=central \
-            -Dcentral.autoPublish=true
+        run: mvn -B clean deploy -DskipTests -f pom.xml -Dgpg.passphrase="$GPG_PASSPHRASE"
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USERNAME: ${{ secrets.TOKEN_USERNAME }}
