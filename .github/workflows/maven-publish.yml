@@ -32,7 +32,7 @@ jobs:
       - name: Publish to Maven Central
         run: |
            \cp pom-hwkms.xml pom.xml
-           mvn -B clean deploy -DskipTests -f pom.xml -Dgpg.passphrase="$GPG_PASSPHRASE"
+           mvn -B clean install -DskipTests -f pom.xml -Dgpg.passphrase="$GPG_PASSPHRASE"
            mvn -B central-publishing:publish \
             -Dcentral.groupId=io.github.hwkms \
             -Dcentral.artifactId=huaweicloud-encryption-sdk-java \
