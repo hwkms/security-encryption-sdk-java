@@ -16,6 +16,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           generate-toolchains: false
+
+      - name: Write maven settings.xml
+        env:
+          USERNAME: ${{ secrets.TOKEN_USERNAME }}
+          PASSWORD: ${{ secrets.TOKEN_USERNAME }}
+        run: |
+          mkdir -p ~/.m2
+          echo '<settings><servers><server><id>central</id><username>'"$USERNAME"'</username><password>'"$PASSWORD"'</password></server></servers></settings>' > ~/.m2/settings.xml
       - name: Setup Maven Action
         uses: s4u/setup-maven-action@v1.21.0
         with:
