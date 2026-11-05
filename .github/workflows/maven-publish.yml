@@ -29,6 +29,6 @@ jobs:
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
       - name: Publish to Maven Central
-        run: mvn -B clean deploy -DskipTests -f pom-hwkms.xml -P release -Dgpg.passphrase="$GPG_PASSPHRASE"
+        run: mvn -B clean deploy -DskipTests -f pom-hwkms.xml -Dgpg.passphrase="$GPG_PASSPHRASE"
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
