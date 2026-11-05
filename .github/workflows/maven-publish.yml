@@ -34,9 +34,10 @@ jobs:
           cp pom-hwkms.xml pom.xml
           mvn -B clean install -DskipTests -f pom.xml -Dgpg.passphrase="$GPG_PASSPHRASE"
           ls -la ~/.m2/repository/io/github/hwkms/huaweicloud-encryption-sdk-java/1.2.3/
-          # 重点：-f /dev/null 脱离项目上下文，全限定插件目标
+          # 新建空目录，cd进去，脱离项目pom上下文
+          mkdir -p /tmp/empty
+          cd /tmp/empty
           mvn -B org.sonatype.central:central-publishing-maven-plugin:0.12.0:publish \
-            -f /dev/null \
             -Dcentral.groupId=io.github.hwkms \
             -Dcentral.artifactId=huaweicloud-encryption-sdk-java \
             -Dcentral.version=1.2.3 \
@@ -47,4 +48,5 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USERNAME: ${{ secrets.TOKEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.TOKEN_PASSWORD }}
+
 
