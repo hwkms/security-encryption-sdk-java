@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "total_size": 15231233024
+  },
+  "weight_map": {
+    "model.embed_tokens.weight": "model-00001-of-000002.safetensors",
+    "model.norm.weight": "model-00002-of-000002.safetensors",
+    "lm_head.weight": "model-00002-of-000002.safetensors"
+  }
+}
