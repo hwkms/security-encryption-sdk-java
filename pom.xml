@@ -269,19 +269,6 @@
 			        </execution>
 			    </executions>
 			</plugin>
-			
-		      <plugin>
-		        <groupId>org.sonatype.central</groupId>
-		        <artifactId>central-publishing-maven-plugin</artifactId>
-		        <version>0.12.0</version>
-		        <extensions>true</extensions>
-		        <configuration>
-		          <publishingServerId>central</publishingServerId>
-				  <autoPublish>true</autoPublish>
-                  <waitUntil>published</waitUntil>
-		        </configuration>
-		      </plugin>
-			
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -360,4 +347,30 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <!-- Maven Central 发布专用：mvn -P publish-central clean deploy
+             默认不激活：内网构建环境（如 fuxi 门禁）的镜像仓没有
+             org.sonatype.central:central-publishing-maven-plugin，
+             插件以 <extensions>true</extensions> 声明时会在 POM 解析阶段即被强制解析，
+             放在默认激活位置会导致内网所有构建（包括 compiler:compile）直接失败。
+             发布时需显式 -P publish-central 激活。 -->
+        <profile>
+            <id>publish-central</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.12.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>published</waitUntil>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
