@@ -29,4 +29,4 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: python/huaweicloud-encryption-sdk-python/dist/
+          packages-dir: python/huaweicloud-ai-asset-obfuscate/dist/
