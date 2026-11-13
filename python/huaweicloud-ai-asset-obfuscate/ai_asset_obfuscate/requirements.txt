@@ -1,0 +1,10 @@
+torch
+safetensors
+packaging
+numpy
+pillow
+torchvision
+av
+transformers
+huaweicloudsdkcore>=3.1.208
+requests
